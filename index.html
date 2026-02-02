@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gentlemen Who Brunch - Voting App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Cabin:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --secondary: #F7931E;
+            --accent: #FDC500;
+            --dark: #2C1810;
+            --cream: #FFF8E7;
+            --border: #8B4513;
+            --shadow: rgba(44, 24, 16, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cabin', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #FFE8CC 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 107, 53, 0.03) 2px, rgba(255, 107, 53, 0.03) 4px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 30px;
+        }
+
+        h1 {
+            font-family: 'Righteous', cursive;
+            font-size: 2.8em;
+            color: var(--primary);
+            text-shadow: 3px 3px 0 var(--secondary), 6px 6px 0 var(--accent);
+            margin-bottom: 10px;
+            line-height: 1.2;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .champagne-animation {
+            font-size: 3em;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .champagne-glasses {
+            display: inline-block;
+            animation: clinkAndFade 4s ease-in-out infinite;
+        }
+
+        @keyframes clinkAndFade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            10% {
+                transform: scale(1.1) rotate(-5deg);
+            }
+            15% {
+                transform: scale(1.05) rotate(5deg);
+            }
+            20% {
+                transform: scale(1.1) rotate(-3deg);
+            }
+            25% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            35% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .brunch-food {
+            position: absolute;
+            opacity: 0;
+            animation: foodAppear 4s ease-in-out infinite;
+        }
+
+        @keyframes foodAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+            35% {
+                opacity: 0;
+                transform: scale(0.5) rotate(0deg);
+            }
+            45% {
+                opacity: 1;
+                transform: scale(1.2) rotate(10deg);
+            }
+            55% {
+                transform: scale(1) rotate(-5deg);
+            }
+            75% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            95% {
+                opacity: 0;
+                transform: scale(0.8) rotate(360deg);
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: var(--border);
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px 30px;
+            font-family: 'Righteous', cursive;
+            font-size: 1.3em;
+            border: 4px solid var(--dark);
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 0 var(--dark), 0 8px 20px var(--shadow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 var(--dark), 0 6px 15px var(--shadow);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 var(--dark), 0 2px 10px var(--shadow);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn.secondary {
+            background: white;
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 4px 0 var(--primary), 0 6px 15px var(--shadow);
+        }
+
+        .btn.secondary:hover:not(:disabled) {
+            box-shadow: 0 2px 0 var(--primary), 0 4px 12px var(--shadow);
+        }
+
+        .btn.secondary:active:not(:disabled) {
+            box-shadow: 0 0 0 var(--primary), 0 2px 8px var(--shadow);
+        }
+
+        .card {
+            background: white;
+            border: 4px solid var(--dark);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 0 var(--border), 0 12px 30px var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 3px solid var(--dark);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: 'Cabin', sans-serif;
+            background: var(--cream);
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--cream);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .member-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .member-item label {
+            margin: 0;
+            flex: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .voting-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            color: white;
+            border: 3px solid var(--dark);
+        }
+
+        .voting-header h2 {
+            font-family: 'Righteous', cursive;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .voter-name {
+            font-size: 2.5em;
+            font-family: 'Righteous', cursive;
+            color: var(--accent);
+            text-shadow: 2px 2px 0 var(--dark);
+        }
+
+        .vote-options {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .vote-option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .vote-option label {
+            min-width: 60px;
+            font-size: 1.3em;
+            color: var(--primary);
+        }
+
+        .pass-message {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 30px 0;
+            padding: 20px;
+            background: var(--cream);
+            border: 3px dashed var(--primary);
+            border-radius: 12px;
+        }
+
+        .pass-message .next-voter {
+            font-family: 'Righteous', cursive;
+            font-size: 1.3em;
+            color: var(--secondary);
+            display: block;
+            margin-top: 10px;
+        }
+
+        .winner-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .countdown {
+            font-family: 'Righteous', cursive;
+            font-size: 8em;
+            color: var(--primary);
+            text-shadow: 4px 4px 0 var(--secondary), 8px 8px 0 var(--accent);
+            animation: pulse 1s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .winner-reveal {
+            animation: winnerReveal 1s ease-out forwards;
+        }
+
+        @keyframes winnerReveal {
+            0% {
+                opacity: 0;
+                transform: scale(0.5) rotate(-10deg);
+            }
+            70% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .winner-name {
+            font-family: 'Righteous', cursive;
+            font-size: 3.5em;
+            color: var(--primary);
+            text-shadow: 3px 3px 0 var(--secondary), 6px 6px 0 var(--accent);
+            margin: 30px 0;
+        }
+
+        .trophy {
+            font-size: 8em;
+            animation: bounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            position: absolute;
+            animation: confettiFall 3s linear infinite;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .event-card {
+            background: white;
+            border: 3px solid var(--dark);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 var(--border);
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--border), 0 8px 20px var(--shadow);
+        }
+
+        .event-card h3 {
+            font-family: 'Righteous', cursive;
+            color: var(--primary);
+            font-size: 1.4em;
+            margin-bottom: 8px;
+        }
+
+        .event-card .event-date {
+            color: var(--border);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .event-card .event-winner {
+            color: var(--secondary);
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .event-detail {
+            background: white;
+            border: 4px solid var(--dark);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 0 var(--border), 0 12px 30px var(--shadow);
+        }
+
+        .event-detail h2 {
+            font-family: 'Righteous', cursive;
+            color: var(--primary);
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed var(--border);
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 1.1em;
+            color: var(--border);
+        }
+
+        .detail-value.winner {
+            font-family: 'Righteous', cursive;
+            font-size: 1.8em;
+            color: var(--secondary);
+        }
+
+        .voters-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .voter-badge {
+            background: var(--cream);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .back-btn {
+            margin-top: 20px;
+        }
+
+        .brunch-emoji {
+            display: inline-block;
+            font-size: 1.5em;
+            animation: rotate 2s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border: 4px solid var(--dark);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 0 var(--border), 0 12px 30px var(--shadow);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal h2 {
+            font-family: 'Righteous', cursive;
+            color: var(--primary);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .warning-message {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .warning-message strong {
+            display: block;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #d39e00;
+        }
+
+        .vote-breakdown {
+            margin-top: 20px;
+        }
+
+        .voter-section {
+            background: var(--cream);
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .voter-section h3 {
+            font-family: 'Righteous', cursive;
+            color: var(--primary);
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .vote-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .vote-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .vote-points {
+            font-family: 'Righteous', cursive;
+            color: var(--secondary);
+            font-size: 1.1em;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons .btn {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen active">
+            <div class="header">
+                <h1>Gentlemen<br>Who Brunch</h1>
+                <div class="champagne-animation">
+                    <span class="champagne-glasses">🥂</span>
+                    <span class="brunch-food" id="brunchFood">🥐</span>
+                </div>
+            </div>
+            <div class="card">
+                <button class="btn" onclick="showNewVote()">
+                    🗳️ Create New Vote
+                </button>
+                <button class="btn secondary" onclick="showHistory()">
+                    📜 View History
+                </button>
+            </div>
+        </div>
+
+        <!-- New Vote Setup Screen -->
+        <div id="newVoteScreen" class="screen">
+            <div class="header">
+                <h1 style="font-size: 2em;">New Vote</h1>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label for="eventName">Event Name</label>
+                    <input type="text" id="eventName" placeholder="Enter event name" oninput="validateForm()">
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Date</label>
+                    <input type="date" id="eventDate" oninput="validateForm()">
+                </div>
+                <div class="form-group">
+                    <label>Members Present</label>
+                    <div class="member-list" id="memberList"></div>
+                </div>
+                <button class="btn" id="voteNowBtn" onclick="startVoting()" disabled>
+                    Vote Now
+                </button>
+                <button class="btn secondary" onclick="showHome()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- Voting Screen -->
+        <div id="votingScreen" class="screen">
+            <div class="voting-header">
+                <h2>Cast Your Vote</h2>
+                <div class="voter-name" id="currentVoter"></div>
+            </div>
+            <div class="card">
+                <div class="vote-options">
+                    <div class="vote-option">
+                        <label>3 pts:</label>
+                        <select id="vote3pts"></select>
+                    </div>
+                    <div class="vote-option">
+                        <label>2 pts:</label>
+                        <select id="vote2pts"></select>
+                    </div>
+                    <div class="vote-option">
+                        <label>1 pt:</label>
+                        <select id="vote1pt"></select>
+                    </div>
+                </div>
+                <button class="btn" onclick="submitVote()" style="margin-top: 30px;">
+                    Submit Vote
+                </button>
+            </div>
+        </div>
+
+        <!-- Pass Phone Screen -->
+        <div id="passScreen" class="screen">
+            <div class="header">
+                <h1 style="font-size: 2em;">Vote Recorded!</h1>
+            </div>
+            <div class="card">
+                <div class="pass-message">
+                    Pass the phone to
+                    <span class="next-voter" id="nextVoter"></span>
+                </div>
+                <button class="btn" onclick="nextVoter()">
+                    Ready ✓
+                </button>
+            </div>
+        </div>
+
+        <!-- Voting Complete Screen -->
+        <div id="completeScreen" class="screen">
+            <div class="header">
+                <h1 style="font-size: 2em;">Voting Complete!</h1>
+            </div>
+            <div class="card">
+                <div class="pass-message">
+                    Pass the phone back to the<br>
+                    <span class="next-voter">Reigning MDG</span>
+                </div>
+                <button class="btn" onclick="revealWinner()">
+                    🏆 Reveal the Winner
+                </button>
+            </div>
+        </div>
+
+        <!-- Winner Screen -->
+        <div id="winnerScreen" class="screen">
+            <div class="winner-screen">
+                <div id="countdownDisplay"></div>
+                <div id="winnerDisplay"></div>
+            </div>
+        </div>
+
+        <!-- History Screen -->
+        <div id="historyScreen" class="screen">
+            <div class="header">
+                <h1 style="font-size: 2em;">Event History</h1>
+            </div>
+            <div class="event-list" id="eventList"></div>
+            <button class="btn" onclick="showRecycleBin()" style="background: linear-gradient(135deg, #666, #888); margin-top: 30px;">
+                🗑️ Recycle Bin
+            </button>
+            <button class="btn secondary back-btn" onclick="showHome()">
+                Back to Home
+            </button>
+        </div>
+
+        <!-- Event Detail Screen -->
+        <div id="eventDetailScreen" class="screen">
+            <div class="event-detail" id="eventDetailContent"></div>
+            <button class="btn" onclick="deleteEvent()" style="background: linear-gradient(135deg, #d32f2f, #f44336); margin-top: 20px;">
+                🗑️ Delete Event
+            </button>
+            <button class="btn secondary back-btn" onclick="showHistory()">
+                Back to History
+            </button>
+        </div>
+
+        <!-- Recycle Bin Screen -->
+        <div id="recycleBinScreen" class="screen">
+            <div class="header">
+                <h1 style="font-size: 2em;">Recycle Bin</h1>
+            </div>
+            <div class="event-list" id="recycleBinList"></div>
+            <button class="btn" onclick="emptyRecycleBin()" style="background: linear-gradient(135deg, #d32f2f, #f44336); margin-top: 30px;">
+                🗑️ Empty Recycle Bin
+            </button>
+            <button class="btn secondary back-btn" onclick="showHistory()">
+                Back to History
+            </button>
+        </div>
+
+        <!-- Deleted Event Detail Screen -->
+        <div id="deletedEventDetailScreen" class="screen">
+            <div class="event-detail" id="deletedEventDetailContent"></div>
+            <button class="btn" onclick="restoreEvent()" style="background: linear-gradient(135deg, #388e3c, #4caf50); margin-top: 20px;">
+                ♻️ Restore Event
+            </button>
+            <button class="btn secondary back-btn" onclick="showRecycleBin()">
+                Back to Recycle Bin
+            </button>
+        </div>
+    </div>
+
+    <!-- Voting Breakdown Modal -->
+    <div id="votingBreakdownModal" class="modal-overlay">
+        <div class="modal">
+            <h2>⚠️ Voting Breakdown</h2>
+            <div class="warning-message">
+                <strong>Warning!</strong>
+                This feature should only be used in case of disputes. Viewing individual votes may affect the integrity and fun of future voting sessions.
+            </div>
+            <div id="breakdownContent"></div>
+            <div class="modal-buttons">
+                <button class="btn secondary" onclick="closeBreakdownModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DEFAULT_MEMBERS = ['Otto', 'AK', 'Pete', 'Danny', 'Monty', 'Karl', 'Jordan', 'Isaac'];
+        let currentEvent = null;
+        let currentVoterIndex = 0;
+        let votes = {};
+        let events = JSON.parse(localStorage.getItem('brunchEvents') || '[]');
+        let deletedEvents = JSON.parse(localStorage.getItem('brunchDeletedEvents') || '[]');
+        let currentEventIndex = null;
+        let currentDeletedEventIndex = null;
+
+        // Initialize member list
+        function initMemberList() {
+            const memberList = document.getElementById('memberList');
+            memberList.innerHTML = '';
+            DEFAULT_MEMBERS.forEach(member => {
+                const item = document.createElement('div');
+                item.className = 'member-item';
+                item.innerHTML = `
+                    <input type="checkbox" id="member-${member}" value="${member}" checked onchange="validateForm()">
+                    <label for="member-${member}">${member}</label>
+                `;
+                memberList.appendChild(item);
+            });
+        }
+
+        function validateForm() {
+            const eventName = document.getElementById('eventName').value.trim();
+            const eventDate = document.getElementById('eventDate').value;
+            const btn = document.getElementById('voteNowBtn');
+            btn.disabled = !(eventName && eventDate);
+        }
+
+        function getSelectedMembers() {
+            return DEFAULT_MEMBERS.filter(member => 
+                document.getElementById(`member-${member}`).checked
+            );
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function showHome() {
+            showScreen('homeScreen');
+        }
+
+        function showNewVote() {
+            initMemberList();
+            document.getElementById('eventName').value = '';
+            document.getElementById('eventDate').value = '';
+            validateForm();
+            showScreen('newVoteScreen');
+        }
+
+        function startVoting() {
+            const eventName = document.getElementById('eventName').value.trim();
+            const eventDate = document.getElementById('eventDate').value;
+            const members = getSelectedMembers();
+
+            currentEvent = {
+                name: eventName,
+                date: eventDate,
+                members: members,
+                timestamp: new Date().toISOString()
+            };
+
+            currentVoterIndex = 0;
+            votes = {};
+            setupVotingScreen();
+        }
+
+        function setupVotingScreen() {
+            const members = currentEvent.members;
+            const currentVoter = members[currentVoterIndex];
+            
+            document.getElementById('currentVoter').textContent = currentVoter;
+            
+            // Populate dropdowns with all members except current voter
+            const otherMembers = members.filter(m => m !== currentVoter);
+            const dropdowns = ['vote3pts', 'vote2pts', 'vote1pt'];
+            
+            dropdowns.forEach(id => {
+                const select = document.getElementById(id);
+                select.innerHTML = '<option value="">Select...</option>';
+                otherMembers.forEach(member => {
+                    select.innerHTML += `<option value="${member}">${member}</option>`;
+                });
+            });
+
+            showScreen('votingScreen');
+        }
+
+        function submitVote() {
+            const currentVoter = currentEvent.members[currentVoterIndex];
+            const vote3 = document.getElementById('vote3pts').value;
+            const vote2 = document.getElementById('vote2pts').value;
+            const vote1 = document.getElementById('vote1pt').value;
+
+            // Check if any votes were cast
+            const votesCount = [vote3, vote2, vote1].filter(v => v !== "").length;
+            
+            if (votesCount === 0) {
+                alert('You must select at least one vote!');
+                return;
+            }
+
+            // If not all votes are filled, show warning
+            if (votesCount < 3) {
+                const unvotedPoints = [];
+                if (!vote3) unvotedPoints.push('3 pts');
+                if (!vote2) unvotedPoints.push('2 pts');
+                if (!vote1) unvotedPoints.push('1 pt');
+                
+                if (!confirm(`Warning: You haven't assigned ${unvotedPoints.join(', ')}.\n\nAre you sure you want to continue without assigning all points?`)) {
+                    return;
+                }
+            }
+
+            // Validate uniqueness only if more than 3 members
+            const otherMembers = currentEvent.members.filter(m => m !== currentVoter);
+            if (otherMembers.length > 3) {
+                // For 4+ other members, votes must be unique
+                const votedMembers = [vote3, vote2, vote1].filter(v => v !== "");
+                const uniqueVotes = new Set(votedMembers);
+                
+                if (votedMembers.length !== uniqueVotes.size) {
+                    alert('You must vote for different people!');
+                    return;
+                }
+            }
+
+            // Store votes (only save non-empty votes)
+            votes[currentVoter] = {};
+            if (vote3) votes[currentVoter]['3'] = vote3;
+            if (vote2) votes[currentVoter]['2'] = vote2;
+            if (vote1) votes[currentVoter]['1'] = vote1;
+
+            currentVoterIndex++;
+
+            if (currentVoterIndex < currentEvent.members.length) {
+                document.getElementById('nextVoter').textContent = currentEvent.members[currentVoterIndex];
+                showScreen('passScreen');
+            } else {
+                showScreen('completeScreen');
+            }
+        }
+
+        function nextVoter() {
+            setupVotingScreen();
+        }
+
+        function calculateWinner() {
+            const scores = {};
+            currentEvent.members.forEach(member => {
+                scores[member] = 0;
+            });
+
+            Object.values(votes).forEach(vote => {
+                if (vote['3']) scores[vote['3']] += 3;
+                if (vote['2']) scores[vote['2']] += 2;
+                if (vote['1']) scores[vote['1']] += 1;
+            });
+
+            // Sort by score descending
+            const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+            const maxScore = sortedScores[0][1];
+            const winners = sortedScores.filter(([name, score]) => score === maxScore).map(([name]) => name);
+            
+            return {
+                winners: winners,
+                isTie: winners.length > 1,
+                scores: sortedScores
+            };
+        }
+
+        function revealWinner() {
+            showScreen('winnerScreen');
+            const countdownDisplay = document.getElementById('countdownDisplay');
+            const winnerDisplay = document.getElementById('winnerDisplay');
+            
+            countdownDisplay.innerHTML = '';
+            winnerDisplay.innerHTML = '';
+
+            let count = 3;
+            const countdownInterval = setInterval(() => {
+                countdownDisplay.innerHTML = `<div class="countdown">${count}</div>`;
+                count--;
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    showWinner();
+                }
+            }, 1000);
+        }
+
+        function showWinner() {
+            const result = calculateWinner();
+            const winnerDisplay = document.getElementById('winnerDisplay');
+            
+            // Save event to history with votes
+            currentEvent.winner = result.isTie ? result.winners.join(' & ') : result.winners[0];
+            currentEvent.voters = Object.keys(votes);
+            currentEvent.scores = Object.fromEntries(result.scores);
+            currentEvent.votes = JSON.parse(JSON.stringify(votes)); // Deep copy of votes
+            events.push(currentEvent);
+            localStorage.setItem('brunchEvents', JSON.stringify(events));
+
+            // Random brunch emojis
+            const brunchEmojis = ['🥐', '🥞', '🧇', '🥓', '🍳', '☕', '🥖', '🧈'];
+            const randomEmoji = brunchEmojis[Math.floor(Math.random() * brunchEmojis.length)];
+
+            const countdownDisplay = document.getElementById('countdownDisplay');
+            countdownDisplay.innerHTML = '';
+
+            let winnerText = '';
+            if (result.isTie) {
+                winnerText = `
+                    <div class="winner-reveal">
+                        <div class="trophy">${randomEmoji}</div>
+                        <div style="font-size: 1.8em; font-weight: 700; color: var(--secondary); margin: 20px 0;">
+                            IT'S A TIE!
+                        </div>
+                        <div class="winner-name" style="font-size: 2.5em;">
+                            ${result.winners.join(' & ')}
+                        </div>
+                        <p style="font-size: 1.3em; font-weight: 700; color: var(--secondary); margin-top: 20px;">
+                            Co-Most Dapper Gentlemen!
+                        </p>
+                    </div>
+                `;
+            } else {
+                winnerText = `
+                    <div class="winner-reveal">
+                        <div class="trophy">${randomEmoji}</div>
+                        <div class="winner-name">${result.winners[0]}</div>
+                        <p style="font-size: 1.5em; font-weight: 700; color: var(--secondary); margin-top: 20px;">
+                            Most Dapper Gentleman!
+                        </p>
+                    </div>
+                `;
+            }
+
+            // Add scores breakdown
+            const scoresHtml = `
+                <div style="margin-top: 40px; background: white; border: 3px solid var(--dark); border-radius: 12px; padding: 25px;">
+                    <h3 style="font-family: 'Righteous', cursive; color: var(--primary); font-size: 1.5em; margin-bottom: 20px; text-align: center;">
+                        Final Scores
+                    </h3>
+                    ${result.scores.map(([name, score], index) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; margin-bottom: 10px; background: ${index === 0 ? 'linear-gradient(135deg, var(--accent), var(--secondary))' : 'var(--cream)'}; border: 2px solid var(--border); border-radius: 8px;">
+                            <span style="font-weight: 700; font-size: 1.1em; ${index === 0 ? 'color: white;' : 'color: var(--dark);'}">${index + 1}. ${name}</span>
+                            <span style="font-family: 'Righteous', cursive; font-size: 1.3em; ${index === 0 ? 'color: white;' : 'color: var(--primary);'}">${score} pts</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            winnerDisplay.innerHTML = winnerText + scoresHtml;
+
+            // Add confetti effect
+            createConfetti();
+
+            // Add buttons after 3 seconds
+            setTimeout(() => {
+                winnerDisplay.innerHTML += `
+                    <button class="btn" onclick="showVotingBreakdown()" style="margin-top: 30px; background: linear-gradient(135deg, #666, #888);">
+                        🔍 View Voting Breakdown
+                    </button>
+                    <button class="btn" onclick="showHome()" style="margin-top: 10px;">
+                        Return Home
+                    </button>
+                `;
+            }, 3000);
+        }
+
+        function createConfetti() {
+            const colors = ['#FF6B35', '#F7931E', '#FDC500', '#8B4513'];
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 50);
+            }
+        }
+
+        function showHistory() {
+            // Reload from localStorage to ensure we have latest data
+            events = JSON.parse(localStorage.getItem('brunchEvents') || '[]');
+            console.log('Loading history, events count:', events.length);
+            
+            const eventList = document.getElementById('eventList');
+            
+            if (events.length === 0) {
+                eventList.innerHTML = '<div class="card" style="text-align: center; color: var(--border);">No events yet. Create your first vote!</div>';
+            } else {
+                eventList.innerHTML = events.map((event, index) => `
+                    <div class="event-card" onclick="showEventDetail(${index})">
+                        <h3>${event.name}</h3>
+                        <div class="event-date">${new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        <div class="event-winner">Winner: ${event.winner}</div>
+                    </div>
+                `).join('');
+            }
+            
+            showScreen('historyScreen');
+        }
+
+        function showEventDetail(index) {
+            currentEventIndex = index;
+            const event = events[index];
+            const detailContent = document.getElementById('eventDetailContent');
+            
+            let scoresHtml = '';
+            if (event.scores) {
+                const sortedScores = Object.entries(event.scores).sort((a, b) => b[1] - a[1]);
+                scoresHtml = `
+                    <div class="detail-section">
+                        <div class="detail-label">Final Scores</div>
+                        <div style="margin-top: 15px;">
+                            ${sortedScores.map(([name, score], index) => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: ${index === 0 ? 'linear-gradient(135deg, var(--accent), var(--secondary))' : 'var(--cream)'}; border: 2px solid var(--border); border-radius: 8px;">
+                                    <span style="font-weight: 700; ${index === 0 ? 'color: white;' : 'color: var(--dark);'}">${index + 1}. ${name}</span>
+                                    <span style="font-family: 'Righteous', cursive; font-size: 1.2em; ${index === 0 ? 'color: white;' : 'color: var(--primary);'}">${score} pts</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            detailContent.innerHTML = `
+                <h2>${event.name}</h2>
+                <div class="detail-section">
+                    <div class="detail-label">Date</div>
+                    <div class="detail-value">${new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Winner</div>
+                    <div class="detail-value winner">${event.winner}</div>
+                </div>
+                ${scoresHtml}
+                <div class="detail-section">
+                    <div class="detail-label">Who Voted</div>
+                    <div class="voters-list">
+                        ${event.voters.map(voter => `<div class="voter-badge">${voter}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+            
+            showScreen('eventDetailScreen');
+            
+            // Add breakdown button after render if votes exist
+            if (event.votes) {
+                const breakdownBtn = document.createElement('button');
+                breakdownBtn.className = 'btn';
+                breakdownBtn.style.background = 'linear-gradient(135deg, #666, #888)';
+                breakdownBtn.style.marginTop = '20px';
+                breakdownBtn.innerHTML = '🔍 View Voting Breakdown';
+                breakdownBtn.onclick = function() {
+                    if (confirm('⚠️ WARNING: This feature should only be used in case of disputes.\n\nViewing individual votes may affect the integrity and fun of future voting sessions.\n\nDo you want to continue?')) {
+                        displayVotingBreakdown(event.votes);
+                    }
+                };
+                detailContent.appendChild(breakdownBtn);
+            }
+        }
+
+        function deleteEvent() {
+            if (currentEventIndex === null) {
+                console.log('Error: currentEventIndex is null');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this event? You can restore it from the Recycle Bin.')) {
+                console.log('Deleting event at index:', currentEventIndex);
+                console.log('Events before delete:', events.length);
+                
+                const deletedEvent = events.splice(currentEventIndex, 1)[0];
+                deletedEvent.deletedAt = new Date().toISOString();
+                deletedEvents.push(deletedEvent);
+                
+                console.log('Events after delete:', events.length);
+                console.log('Deleted events count:', deletedEvents.length);
+                
+                localStorage.setItem('brunchEvents', JSON.stringify(events));
+                localStorage.setItem('brunchDeletedEvents', JSON.stringify(deletedEvents));
+                
+                console.log('Saved to localStorage');
+                
+                currentEventIndex = null;
+                showHistory();
+            }
+        }
+
+        function showRecycleBin() {
+            // Reload from localStorage to ensure we have latest data
+            deletedEvents = JSON.parse(localStorage.getItem('brunchDeletedEvents') || '[]');
+            console.log('Loading recycle bin, deleted events count:', deletedEvents.length);
+            
+            const recycleBinList = document.getElementById('recycleBinList');
+            
+            if (deletedEvents.length === 0) {
+                recycleBinList.innerHTML = '<div class="card" style="text-align: center; color: var(--border);">Recycle bin is empty.</div>';
+            } else {
+                // Sort by deletion date, most recent first
+                const sortedEvents = [...deletedEvents].sort((a, b) => 
+                    new Date(b.deletedAt) - new Date(a.deletedAt)
+                );
+                
+                recycleBinList.innerHTML = sortedEvents.map((event) => {
+                    const originalIndex = deletedEvents.indexOf(event);
+                    return `
+                        <div class="event-card" onclick="showDeletedEventDetail(${originalIndex})" style="opacity: 0.8;">
+                            <h3>${event.name}</h3>
+                            <div class="event-date">${new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                            <div class="event-winner">Winner: ${event.winner}</div>
+                            <div style="font-size: 0.9em; color: #999; margin-top: 5px;">
+                                Deleted: ${new Date(event.deletedAt).toLocaleDateString()}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            showScreen('recycleBinScreen');
+        }
+
+        function showDeletedEventDetail(index) {
+            currentDeletedEventIndex = index;
+            const event = deletedEvents[index];
+            const detailContent = document.getElementById('deletedEventDetailContent');
+            
+            let scoresHtml = '';
+            if (event.scores) {
+                const sortedScores = Object.entries(event.scores).sort((a, b) => b[1] - a[1]);
+                scoresHtml = `
+                    <div class="detail-section">
+                        <div class="detail-label">Final Scores</div>
+                        <div style="margin-top: 15px;">
+                            ${sortedScores.map(([name, score], index) => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: ${index === 0 ? 'linear-gradient(135deg, var(--accent), var(--secondary))' : 'var(--cream)'}; border: 2px solid var(--border); border-radius: 8px;">
+                                    <span style="font-weight: 700; ${index === 0 ? 'color: white;' : 'color: var(--dark);'}">${index + 1}. ${name}</span>
+                                    <span style="font-family: 'Righteous', cursive; font-size: 1.2em; ${index === 0 ? 'color: white;' : 'color: var(--primary);'}">${score} pts</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            detailContent.innerHTML = `
+                <h2>${event.name}</h2>
+                <div class="detail-section">
+                    <div class="detail-label">Date</div>
+                    <div class="detail-value">${new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Winner</div>
+                    <div class="detail-value winner">${event.winner}</div>
+                </div>
+                ${scoresHtml}
+                <div class="detail-section">
+                    <div class="detail-label">Who Voted</div>
+                    <div class="voters-list">
+                        ${event.voters.map(voter => `<div class="voter-badge">${voter}</div>`).join('')}
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-label">Deleted</div>
+                    <div class="detail-value">${new Date(event.deletedAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                </div>
+            `;
+            
+            showScreen('deletedEventDetailScreen');
+            
+            // Add breakdown button after render if votes exist
+            if (event.votes) {
+                const breakdownBtn = document.createElement('button');
+                breakdownBtn.className = 'btn';
+                breakdownBtn.style.background = 'linear-gradient(135deg, #666, #888)';
+                breakdownBtn.style.marginTop = '20px';
+                breakdownBtn.innerHTML = '🔍 View Voting Breakdown';
+                breakdownBtn.onclick = function() {
+                    if (confirm('⚠️ WARNING: This feature should only be used in case of disputes.\n\nViewing individual votes may affect the integrity and fun of future voting sessions.\n\nDo you want to continue?')) {
+                        displayVotingBreakdown(event.votes);
+                    }
+                };
+                detailContent.appendChild(breakdownBtn);
+            }
+        }
+
+        function restoreEvent() {
+            if (currentDeletedEventIndex === null) return;
+            
+            const restoredEvent = deletedEvents.splice(currentDeletedEventIndex, 1)[0];
+            delete restoredEvent.deletedAt;
+            events.push(restoredEvent);
+            
+            localStorage.setItem('brunchEvents', JSON.stringify(events));
+            localStorage.setItem('brunchDeletedEvents', JSON.stringify(deletedEvents));
+            
+            currentDeletedEventIndex = null;
+            showRecycleBin();
+        }
+
+        function emptyRecycleBin() {
+            if (deletedEvents.length === 0) {
+                alert('Recycle bin is already empty!');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to permanently delete ${deletedEvents.length} event(s)? This cannot be undone!`)) {
+                deletedEvents = [];
+                localStorage.setItem('brunchDeletedEvents', JSON.stringify(deletedEvents));
+                showRecycleBin();
+            }
+        }
+
+        function showVotingBreakdown() {
+            if (confirm('⚠️ WARNING: This feature should only be used in case of disputes.\n\nViewing individual votes may affect the integrity and fun of future voting sessions.\n\nDo you want to continue?')) {
+                displayVotingBreakdown(votes);
+            }
+        }
+
+        function displayVotingBreakdown(votesData) {
+            const breakdownContent = document.getElementById('breakdownContent');
+            
+            let html = '<div class="vote-breakdown">';
+            
+            Object.entries(votesData).forEach(([voter, votes]) => {
+                html += `
+                    <div class="voter-section">
+                        <h3>${voter}'s Votes</h3>
+                `;
+                
+                if (votes['3']) {
+                    html += `
+                        <div class="vote-row">
+                            <span>${votes['3']}</span>
+                            <span class="vote-points">3 points</span>
+                        </div>
+                    `;
+                }
+                
+                if (votes['2']) {
+                    html += `
+                        <div class="vote-row">
+                            <span>${votes['2']}</span>
+                            <span class="vote-points">2 points</span>
+                        </div>
+                    `;
+                }
+                
+                if (votes['1']) {
+                    html += `
+                        <div class="vote-row">
+                            <span>${votes['1']}</span>
+                            <span class="vote-points">1 point</span>
+                        </div>
+                    `;
+                }
+                
+                // Show message if no votes were cast
+                if (!votes['3'] && !votes['2'] && !votes['1']) {
+                    html += `
+                        <div style="color: #999; font-style: italic; padding: 10px;">
+                            No votes assigned
+                        </div>
+                    `;
+                }
+                
+                html += `</div>`;
+            });
+            
+            html += '</div>';
+            breakdownContent.innerHTML = html;
+            
+            document.getElementById('votingBreakdownModal').classList.add('active');
+        }
+
+        function closeBreakdownModal() {
+            document.getElementById('votingBreakdownModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('votingBreakdownModal');
+            if (event.target === modal) {
+                closeBreakdownModal();
+            }
+        });
+
+        // Set today's date as default when page loads
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventDate').value = today;
+            
+            // Cycle through brunch foods
+            const brunchFoods = ['🥐', '🥞', '🧇', '🥓', '🍳', '☕', '🥖', '🧈', '🍊', '🥯'];
+            let foodIndex = 0;
+            
+            setInterval(() => {
+                foodIndex = (foodIndex + 1) % brunchFoods.length;
+                const brunchFoodElement = document.getElementById('brunchFood');
+                if (brunchFoodElement) {
+                    brunchFoodElement.textContent = brunchFoods[foodIndex];
+                }
+            }, 4000); // Changes every 4 seconds to match animation cycle
+        };
+    </script>
+</body>
+</html>
