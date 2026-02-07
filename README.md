@@ -22,6 +22,8 @@ This web-based application allows brunch group members to vote for the Most Dapp
 - **Create New Events**: Set event name, date, and select attending members
 - **Default Members**: Otto, AK, Pete, Danny, Monty, Karl, Jordan, Isaac
 - **Member Selection**: Add or remove members based on attendance
+- **Guest Addition**: Add temporary guests for a single event (doesn't affect permanent roster)
+- **Member Management**: Dedicated screen to permanently add or remove members from the roster
 - **Event History**: View all past events with winner information
 - **Event Details**: See event name, date, winner, full score breakdown, and voting participants
 
@@ -54,7 +56,11 @@ This web-based application allows brunch group members to vote for the Most Dapp
 1. Click "Create New Vote" from home screen
 2. Enter event name and date
 3. Select which members attended (default: all members checked)
-4. Click "Vote Now" (button activates when name and date are filled)
+4. (Optional) Add guests: Enter guest name and click "➕ Add Guest"
+   - Guests are temporary and only for this event
+   - Guests appear with a blue background and 👤 icon
+   - Remove guests by clicking "✕ Remove"
+5. Click "Vote Now" (button activates when name and date are filled)
 
 ### Voting Process
 1. First voter sees their name and voting options
@@ -77,6 +83,18 @@ This web-based application allows brunch group members to vote for the Most Dapp
 - **Delete Event**: Click "Delete Event" from event detail page
 - **Recycle Bin**: Access from history screen to view/restore deleted events
 - **Empty Recycle Bin**: Permanently delete all events in recycle bin
+
+### Managing Members
+- **Access**: Click "Manage Members" from home screen
+- **View Members**: See the current roster of all members
+- **Add Member**: Enter name in text field and click "➕ Add"
+  - Prevents duplicate names
+  - New members immediately available for voting
+- **Remove Member**: Click "🗑️ Remove" next to any member
+  - Confirmation required
+  - Must keep at least one member
+  - Historical data preserved (removed members still show in past events)
+- **Persistent Changes**: Member changes are saved and persist across sessions
 
 ## 🔒 Data & Privacy
 
@@ -125,7 +143,7 @@ This web-based application allows brunch group members to vote for the Most Dapp
 - Cycling brunch food emojis (changes every 4 seconds)
 - Enhanced home screen aesthetic
 
-### Version 1.4 - Voting Breakdown (Current)
+### Version 1.4 - Voting Breakdown
 **Added:**
 - "View Voting Breakdown" feature with warning confirmation
 - Detailed individual vote display in modal
@@ -140,6 +158,27 @@ This web-based application allows brunch group members to vote for the Most Dapp
 - Improved vote validation logic
 - Updated terminology from "Most Distinguished Gentleman" to "Most Dapper Gentleman" (MDG)
 - Increased spacing between event lists and action buttons on history/recycle bin screens
+
+### Version 1.5 - Member Management (Current)
+**Added:**
+- "Manage Members" screen accessible from home screen
+- Add new members to the roster permanently
+- Remove members from the roster with confirmation
+- Duplicate name prevention (case-insensitive)
+- Minimum one member requirement
+- Member changes persist in localStorage
+- Historical events preserve member names even after removal
+- **Guest Addition**: Add temporary guests during vote creation
+  - Guests only participate in the current event
+  - Visual distinction with blue background and 👤 icon
+  - Guest names validated against existing members and other guests
+  - Guests don't affect permanent member roster
+
+**Technical:**
+- Members stored as `brunchMembers` in localStorage
+- Loads saved members on app start, falls back to default 8 members
+- Member management doesn't affect historical voting data
+- Guests are combined with selected members for voting but not stored permanently
 
 ## 🎯 Future Considerations
 
@@ -166,6 +205,6 @@ Created for the Gentlemen Who Brunch group to add fun and friendly competition t
 
 ---
 
-**Version**: 1.4  
+**Version**: 1.5  
 **Last Updated**: February 2026  
 **Maintained by**: The Reigning MDG 👑
