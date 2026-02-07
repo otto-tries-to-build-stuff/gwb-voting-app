@@ -310,6 +310,23 @@
             cursor: pointer;
         }
 
+        .member-item .delete-btn {
+            background: #d32f2f;
+            color: white;
+            border: 2px solid var(--dark);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.9em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .member-item .delete-btn:hover {
+            background: #f44336;
+            transform: scale(1.05);
+        }
+
         .voting-header {
             text-align: center;
             margin-bottom: 30px;
@@ -690,6 +707,9 @@
                 <button class="btn secondary" onclick="showHistory()">
                     📜 View History
                 </button>
+                <button class="btn secondary" onclick="showManageMembers()">
+                    👥 Manage Members
+                </button>
             </div>
         </div>
 
@@ -710,6 +730,16 @@
                 <div class="form-group">
                     <label>Members Present</label>
                     <div class="member-list" id="memberList"></div>
+                </div>
+                <div class="form-group" style="margin-top: 25px;">
+                    <label for="guestName">Add Guest (Optional)</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="guestName" placeholder="Guest name">
+                        <button class="btn secondary" onclick="addGuest()" style="width: auto; padding: 12px 24px; margin: 0;">
+                            ➕ Add Guest
+                        </button>
+                    </div>
+                    <div id="guestsList" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
                 </div>
                 <button class="btn" id="voteNowBtn" onclick="startVoting()" disabled>
                     Vote Now
@@ -836,6 +866,31 @@
                 Back to Recycle Bin
             </button>
         </div>
+
+        <!-- Manage Members Screen -->
+        <div id="manageMembersScreen" class="screen">
+            <div class="header">
+                <h1 style="font-size: 2em;">Manage Members</h1>
+            </div>
+            <div class="card">
+                <div class="form-group">
+                    <label>Current Members</label>
+                    <div class="member-list" id="manageMembersList"></div>
+                </div>
+                <div class="form-group" style="margin-top: 30px;">
+                    <label for="newMemberName">Add New Member</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="newMemberName" placeholder="Enter member name" style="flex: 1;">
+                        <button class="btn" onclick="addNewMember()" style="width: auto; padding: 12px 24px; margin: 0;">
+                            ➕ Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn secondary back-btn" onclick="showHome()">
+                Back to Home
+            </button>
+        </div>
     </div>
 
     <!-- Voting Breakdown Modal -->
@@ -854,7 +909,8 @@
     </div>
 
     <script>
-        const DEFAULT_MEMBERS = ['Otto', 'AK', 'Pete', 'Danny', 'Monty', 'Karl', 'Jordan', 'Isaac'];
+        const DEFAULT_MEMBERS_ORIGINAL = ['Otto', 'AK', 'Pete', 'Danny', 'Monty', 'Karl', 'Jordan', 'Isaac'];
+        let DEFAULT_MEMBERS = JSON.parse(localStorage.getItem('brunchMembers')) || DEFAULT_MEMBERS_ORIGINAL;
         let currentEvent = null;
         let currentVoterIndex = 0;
         let votes = {};
@@ -862,6 +918,7 @@
         let deletedEvents = JSON.parse(localStorage.getItem('brunchDeletedEvents') || '[]');
         let currentEventIndex = null;
         let currentDeletedEventIndex = null;
+        let currentGuests = [];
 
         // Initialize member list
         function initMemberList() {
@@ -886,9 +943,10 @@
         }
 
         function getSelectedMembers() {
-            return DEFAULT_MEMBERS.filter(member => 
+            const selectedMembers = DEFAULT_MEMBERS.filter(member => 
                 document.getElementById(`member-${member}`).checked
             );
+            return [...selectedMembers, ...currentGuests];
         }
 
         function showScreen(screenId) {
@@ -904,6 +962,9 @@
 
         function showNewVote() {
             initMemberList();
+            currentGuests = [];
+            document.getElementById('guestName').value = '';
+            document.getElementById('guestsList').innerHTML = '';
             document.getElementById('eventName').value = '';
             document.getElementById('eventDate').value = '';
             validateForm();
@@ -1444,6 +1505,110 @@
 
         function closeBreakdownModal() {
             document.getElementById('votingBreakdownModal').classList.remove('active');
+        }
+
+        function showManageMembers() {
+            renderManageMembersList();
+            showScreen('manageMembersScreen');
+        }
+
+        function renderManageMembersList() {
+            const memberList = document.getElementById('manageMembersList');
+            memberList.innerHTML = '';
+            
+            if (DEFAULT_MEMBERS.length === 0) {
+                memberList.innerHTML = '<div style="text-align: center; color: var(--border); padding: 20px;">No members yet. Add your first member below!</div>';
+                return;
+            }
+            
+            DEFAULT_MEMBERS.forEach(member => {
+                const item = document.createElement('div');
+                item.className = 'member-item';
+                item.innerHTML = `
+                    <span style="flex: 1; font-weight: 600;">${member}</span>
+                    <button class="delete-btn" onclick="removeMember('${member}')">🗑️ Remove</button>
+                `;
+                memberList.appendChild(item);
+            });
+        }
+
+        function addNewMember() {
+            const newMemberInput = document.getElementById('newMemberName');
+            const newMemberName = newMemberInput.value.trim();
+            
+            if (!newMemberName) {
+                alert('Please enter a member name!');
+                return;
+            }
+            
+            // Check if member already exists (case-insensitive)
+            if (DEFAULT_MEMBERS.some(m => m.toLowerCase() === newMemberName.toLowerCase())) {
+                alert('This member already exists!');
+                return;
+            }
+            
+            DEFAULT_MEMBERS.push(newMemberName);
+            localStorage.setItem('brunchMembers', JSON.stringify(DEFAULT_MEMBERS));
+            
+            newMemberInput.value = '';
+            renderManageMembersList();
+        }
+
+        function removeMember(memberName) {
+            if (DEFAULT_MEMBERS.length <= 1) {
+                alert('You must have at least one member!');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to remove ${memberName}? This will not affect historical voting data.`)) {
+                DEFAULT_MEMBERS = DEFAULT_MEMBERS.filter(m => m !== memberName);
+                localStorage.setItem('brunchMembers', JSON.stringify(DEFAULT_MEMBERS));
+                renderManageMembersList();
+            }
+        }
+
+        function addGuest() {
+            const guestInput = document.getElementById('guestName');
+            const guestName = guestInput.value.trim();
+            
+            if (!guestName) {
+                alert('Please enter a guest name!');
+                return;
+            }
+            
+            // Check if name already exists in members or guests
+            const allNames = [...DEFAULT_MEMBERS, ...currentGuests];
+            if (allNames.some(n => n.toLowerCase() === guestName.toLowerCase())) {
+                alert('This name is already in use!');
+                return;
+            }
+            
+            currentGuests.push(guestName);
+            guestInput.value = '';
+            renderGuestsList();
+            validateForm();
+        }
+
+        function removeGuest(guestName) {
+            currentGuests = currentGuests.filter(g => g !== guestName);
+            renderGuestsList();
+            validateForm();
+        }
+
+        function renderGuestsList() {
+            const guestsList = document.getElementById('guestsList');
+            
+            if (currentGuests.length === 0) {
+                guestsList.innerHTML = '';
+                return;
+            }
+            
+            guestsList.innerHTML = currentGuests.map(guest => `
+                <div class="member-item" style="background: #e3f2fd; border-color: #2196f3;">
+                    <span style="flex: 1; font-weight: 600;">👤 ${guest} <span style="font-size: 0.85em; color: #666;">(Guest)</span></span>
+                    <button class="delete-btn" onclick="removeGuest('${guest}')" style="background: #1976d2;">✕ Remove</button>
+                </div>
+            `).join('');
         }
 
         // Close modal when clicking outside
